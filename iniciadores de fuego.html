@@ -302,7 +302,7 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     <br>
     <sup>
         (El envalaje <font size="3" color="red"><b>no se quita</b></font>).
-        (La forma y los materiales del recipiente contenedor pueden variar).
+        (La forma y los materiales del envalaje pueden variar).
         (El producto puede venir sin mecha).
     </sup>
     <br><br>
@@ -444,12 +444,137 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
         También hemos puesto una foto de cómo queda nuestro producto listo para la entrega:
     </p>
     <img src="paquete iniciadores.jpeg" width="500" height="500">
-    <br><br></section>
+    <br><br>
+<p>A continuacion les hemos puesto una encuesta de compra:<br><br>
+          <!--Pedido-->
+<div class="pedido-fuego">
+  <h2>🛒 Encarga tu pedido</h2>
+
+  <div class="fila-precio">
+    <div class="campo">
+      <label for="paquetes">📦 Paquetes (máx. 10)</label>
+      <input type="number" id="paquetes" value="1" min="1" max="10" inputmode="numeric">
+    </div>
+
+    <div class="campo">
+      <label>💲 Precio por paquete</label>
+      <div class="caja" id="precioUnitario">$4.000</div>
+    </div>
+  </div>
+
+  <div class="total-box">
+    <span>Total a pagar</span>
+    <strong id="total">$4.000</strong>
+  </div>
+
+  <button type="button" id="btnComprar" class="btn-whatsapp">🛒 Comprar por WhatsApp</button>
+</div>
+
+<style>
+  .pedido-fuego {
+    background: #aeeeee;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 560px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+  }
+  .pedido-fuego h2 { margin: 0 0 16px; font-size: 1.4rem; color: #1a1a1a; }
+
+  .fila-precio { display: flex; gap: 12px; }
+  .fila-precio .campo { flex: 1; min-width: 0; }
+  .fila-precio label {
+    display: block; font-weight: bold; margin-bottom: 8px; color: #1a1a1a;
+  }
+
+  .pedido-fuego input,
+  .pedido-fuego .caja {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    font-size: 1rem;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    color: #003;
+  }
+  .pedido-fuego .caja { font-weight: bold; }
+
+  .total-box {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+  }
+  .total-box strong { font-size: 1.6rem; color: #0a7a2f; }
+
+  .btn-whatsapp {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #fff;
+    background: #FF4500;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .btn-whatsapp:hover { background: #1ebe5b; }
+</style>
+
+<script>
+  (function () {
+    const PRECIO = 4000;                 // precio por paquete
+    const MAX = 10;                      // límite de paquetes
+    const NUMERO = "5493547452826";      // tu WhatsApp
+
+    const inputPaquetes = document.getElementById("paquetes");
+    const totalEl = document.getElementById("total");
+    const precioEl = document.getElementById("precioUnitario");
+    const btn = document.getElementById("btnComprar");
+
+    const formato = n => "$" + n.toLocaleString("es-AR");
+
+    function cantidad() {
+      let c = parseInt(inputPaquetes.value, 10);
+      if (isNaN(c) || c < 1) c = 1;
+      if (c > MAX) c = MAX;
+      inputPaquetes.value = c;
+      return c;
+    }
+
+    function actualizar() {
+      precioEl.textContent = formato(PRECIO);
+      totalEl.textContent = formato(cantidad() * PRECIO);
+    }
+
+    inputPaquetes.addEventListener("input", actualizar);
+
+    btn.addEventListener("click", function () {
+      const c = cantidad();
+      const mensaje =
+        "Hola! Quiero comprar iniciadores de fuego 🔥\n" +
+        "📦 Paquetes: " + c + "\n" +
+        "💲 Precio por paquete: " + formato(PRECIO) + "\n" +
+        "💰 Total: " + formato(c * PRECIO);
+      window.open("https://wa.me/" + NUMERO + "?text=" + encodeURIComponent(mensaje), "_blank");
+    });
+
+    actualizar();
+  })();
+</script></p></section>
+<!-- ============ COMENTARIOS ============ -->
 <section id="comentarios">
     <p align="left"><hr>
         Si ha comprado nuestro producto, lo invitamos a dejar un comentario opcional:
     </p>
-<!-- ============ COMENTARIOS ============ -->
     <!-- SISTEMA DE COMENTARIOS -->
     <div class="comentarios">
         <h2>Dejá tu comentario</h2>
@@ -736,17 +861,42 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     <p align="center">
         Y, por último, si tenés una consulta, contactanos por WhatsApp.
     </p>
-    <!-- BOTÓN DE WHATSAPP -->
-    <center>
-        <a class="btn-whatsapp"
-           href="https://wa.me/5493547452826?text=Hola,%20queria%20consultar%20sobre%20los%20iniciadores%20de%20fuego%20"
-           target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 32 32" aria-hidden="true">
-                <path d="M16.003 3C8.83 3 3 8.83 3 16c0 2.29.6 4.5 1.74 6.44L3 29l6.73-1.72A12.94 12.94 0 0 0 16 29c7.17 0 13-5.83 13-13S23.17 3 16.003 3zm0 23.6c-1.96 0-3.88-.53-5.55-1.52l-.4-.24-4 1.02 1.07-3.9-.26-.4A10.56 10.56 0 0 1 5.4 16c0-5.85 4.76-10.6 10.6-10.6S26.6 10.15 26.6 16 21.85 26.6 16 26.6zm5.8-7.9c-.32-.16-1.88-.93-2.17-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.58-1.88-1.76-2.2-.19-.32-.02-.49.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.56-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.53-.71-.54h-.61c-.21 0-.56.08-.85.4-.29.32-1.11 1.08-1.11 2.64s1.14 3.06 1.3 3.27c.16.21 2.24 3.42 5.43 4.8.76.33 1.35.52 1.81.67.76.24 1.45.21 2 .13.61-.09 1.88-.77 2.14-1.51.27-.74.27-1.38.19-1.51-.08-.13-.29-.21-.61-.37z"/>
-            </svg>
-            Contactanos por WhatsApp
-        </a>
-    </center>
+    <style>
+.wsp-verde {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #25D366 !important;
+    color: #fff !important;
+    padding: 12px 22px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    transition: background-color 0.2s, transform 0.2s;
+}
+.wsp-verde:hover {
+    background-color: #1ebe5b !important;
+    transform: scale(1.05);
+}
+.wsp-verde svg {
+    width: 26px;
+    height: 26px;
+    fill: #fff;
+}
+</style>
+
+<!-- BOTÓN DE WHATSAPP -->
+<center>
+    <a class="wsp-verde"
+       href="https://wa.me/5493547452826?text=Hola,%20queria%20consultar%20sobre%20los%20iniciadores%20de%20fuego%20"
+       target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16.003 3C8.83 3 3 8.83 3 16c0 2.29.6 4.5 1.74 6.44L3 29l6.73-1.72A12.94 12.94 0 0 0 16 29c7.17 0 13-5.83 13-13S23.17 3 16.003 3zm0 23.6c-1.96 0-3.88-.53-5.55-1.52l-.4-.24-4 1.02 1.07-3.9-.26-.4A10.56 10.56 0 0 1 5.4 16c0-5.85 4.76-10.6 10.6-10.6S26.6 10.15 26.6 16 21.85 26.6 16 26.6zm5.8-7.9c-.32-.16-1.88-.93-2.17-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.58-1.88-1.76-2.2-.19-.32-.02-.49.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.56-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.53-.71-.54h-.61c-.21 0-.56.08-.85.4-.29.32-1.11 1.08-1.11 2.64s1.14 3.06 1.3 3.27c.16.21 2.24 3.42 5.43 4.8.76.33 1.35.52 1.81.67.76.24 1.45.21 2 .13.61-.09 1.88-.77 2.14-1.51.27-.74.27-1.38.19-1.51-.08-.13-.29-.21-.61-.37z"/>
+        </svg>
+        <font color="black">Contactanos por WhatsApp</font>
+    </a>
+</center>
 </section>
 <br>
 <center>
