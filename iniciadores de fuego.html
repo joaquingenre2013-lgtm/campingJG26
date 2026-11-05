@@ -577,11 +577,52 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     <p align="left"><hr>
         Si ha comprado nuestro producto, lo invitamos a dejar un comentario opcional:
     </p>
-    <!-- SISTEMA DE COMENTARIOS -->
+    <style>
+    /* Recuadro del comentario: texto + fotos + botón de cámara */
+    .caja-comentario {
+        border: 1px solid #bbb; border-radius: 8px; background: #fff;
+        padding: 8px; margin: 8px 0; box-sizing: border-box; width: 100%;
+    }
+    .caja-comentario textarea {
+        width: 100% !important; box-sizing: border-box; border: none !important;
+        outline: none !important; resize: vertical; min-height: 80px;
+        background: transparent !important; margin: 0 !important; padding: 4px !important;
+    }
+    .barra-caja { display: flex; align-items: center; gap: 10px; border-top: 1px solid #eee; padding-top: 6px; }
+    #botonFotos { cursor: pointer; padding: 6px 12px; font-size: 15px; }
+    #contadorFotos { font-size: 13px; color: #666; }
+    .preview-fotos { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+    .preview-fotos .mini { position: relative; width: 76px; height: 76px; }
+    .preview-fotos .mini img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+    .preview-fotos .mini button {
+        position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+        border-radius: 50%; border: none; background: #c0392b; color: #fff;
+        font-size: 14px; line-height: 22px; padding: 0; cursor: pointer;
+    }
+    .fotos-comentario { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .fotos-comentario img { width: 90px; height: 90px; object-fit: cover; border-radius: 6px; cursor: zoom-in; }
+    .visor-foto {
+        position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999;
+        display: flex; align-items: center; justify-content: center; cursor: zoom-out;
+    }
+    .visor-foto img { max-width: 95%; max-height: 95%; border-radius: 8px; }
+</style>
+
+<!-- SISTEMA DE COMENTARIOS -->
     <div class="comentarios">
         <h2>Dejá tu comentario</h2>
         <input type="text" id="nombre" placeholder="Tu nombre de usuario" maxlength="50">
-        <textarea id="comentario" placeholder="Escribí tu comentario" maxlength="500"></textarea>
+        <!-- Recuadro: texto + fotos + botón de cámara, todo junto -->
+        <div class="caja-comentario">
+            <textarea id="comentario" placeholder="Escribí tu comentario" maxlength="500"></textarea>
+            <div id="previewFotos" class="preview-fotos"></div>
+            <div class="barra-caja">
+                <button type="button" id="botonFotos" title="Agregar fotos">📷 Foto</button>
+                <span id="contadorFotos">0/3 fotos</span>
+            </div>
+            <input type="file" id="inputFotos" accept="image/*" multiple hidden>
+        </div>
+
         <p>Calificación:</p>
         <div class="estrellas" id="estrellas">
             <span data-valor="1">★</span>
@@ -602,6 +643,7 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     const PAGINA = decodeURIComponent(
         location.pathname.split("/").filter(Boolean).pop() || "inicio"
     ).replace(/\.html$/i, "").trim().toLowerCase();
+    const MAX_FOTOS = 3;
     // ---------- Estado ----------
     let calificacion = 0;
     let comentarios = [];
@@ -609,6 +651,7 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     let calificacionEdicion = 0;
     let esAdmin = false;
     let claveAdmin = "";
+    let fotosNuevas = []; // fotos (dataURL comprimidas) del comentario que se está escribiendo
     // Claves de los comentarios que escribió este navegador: { id: token }
     let misTokens = {};
     try { misTokens = JSON.parse(localStorage.getItem("misComentarios") || "{}"); } catch (e) { misTokens = {}; }
@@ -628,6 +671,75 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
             for (let i = 0; i < calificacion; i++) estrellas[i].classList.add("seleccionada");
         });
     });
+    // ---------- Fotos ----------
+    // Reduce la foto (máx. 900 px) y la pasa a JPEG liviano
+    function comprimirImagen(archivo) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(archivo);
+            const img = new Image();
+            img.onload = () => {
+                const max = 900;
+                const esc = Math.min(1, max / Math.max(img.width, img.height));
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.round(img.width * esc);
+                canvas.height = Math.round(img.height * esc);
+                canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+                resolve(canvas.toDataURL("image/jpeg", 0.7));
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("imagen")); };
+            img.src = url;
+        });
+    }
+    function renderPreview() {
+        const cont = document.getElementById("previewFotos");
+        cont.innerHTML = "";
+        fotosNuevas.forEach((src, i) => {
+            const mini = crearEl("div", "mini");
+            const img = document.createElement("img");
+            img.src = src;
+            const x = crearEl("button", "", "×");
+            x.type = "button";
+            x.title = "Quitar foto";
+            x.addEventListener("click", () => { fotosNuevas.splice(i, 1); renderPreview(); });
+            mini.append(img, x);
+            cont.appendChild(mini);
+        });
+        document.getElementById("contadorFotos").textContent = fotosNuevas.length + "/" + MAX_FOTOS + " fotos";
+    }
+    document.getElementById("botonFotos").addEventListener("click", function () {
+        if (fotosNuevas.length >= MAX_FOTOS) {
+            alert("Podés subir hasta " + MAX_FOTOS + " fotos por comentario.");
+            return;
+        }
+        document.getElementById("inputFotos").click();
+    });
+    document.getElementById("inputFotos").addEventListener("change", async function () {
+        const libres = MAX_FOTOS - fotosNuevas.length;
+        const archivos = Array.from(this.files).filter(f => f.type.startsWith("image/"));
+        if (archivos.length > libres) alert("Solo se agregan " + libres + " foto(s) más: el máximo es " + MAX_FOTOS + ".");
+        for (const f of archivos.slice(0, libres)) {
+            try { fotosNuevas.push(await comprimirImagen(f)); }
+            catch (e) { alert("No se pudo leer una de las fotos."); }
+        }
+        this.value = ""; // permite volver a elegir la misma foto
+        renderPreview();
+    });
+    // Visor para ver la foto en grande
+    function abrirVisor(src) {
+        const visor = crearEl("div", "visor-foto");
+        const img = document.createElement("img");
+        img.src = src;
+        visor.appendChild(img);
+        visor.addEventListener("click", () => visor.remove());
+        document.body.appendChild(visor);
+    }
+    // Acepta solo fotos https o locales, en formato lista o texto JSON
+    function normalizarFotos(f) {
+        if (typeof f === "string") { try { f = JSON.parse(f); } catch (e) { f = []; } }
+        if (!Array.isArray(f)) return [];
+        return f.filter(s => typeof s === "string" && (s.startsWith("https://") || s.startsWith("data:image/"))).slice(0, MAX_FOTOS);
+    }
     // ---------- Envío al servidor ----------
     function enviar(datos) {
         return fetch(URL_SCRIPT, {
@@ -650,19 +762,22 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
         boton.textContent = "Enviando...";
         const id = generarId();
         const token = generarId() + generarId();
+        const fotos = fotosNuevas.slice();
         try {
-            await enviar({ accion: "crear", id, token, nombre, comentario: texto, calificacion, pagina: PAGINA });
+            await enviar({ accion: "crear", id, token, nombre, comentario: texto, calificacion, fotos, pagina: PAGINA });
             misTokens[id] = token;
             guardarTokens();
             // Se muestra enseguida, sin esperar al servidor
-            comentarios.push({ id, nombre, comentario: texto, calificacion, editado: false });
+            comentarios.push({ id, nombre, comentario: texto, calificacion, fotos, editado: false });
             render();
             document.getElementById("nombre").value = "";
             document.getElementById("comentario").value = "";
             calificacion = 0;
+            fotosNuevas = [];
+            renderPreview();
             estrellas.forEach(e => e.classList.remove("seleccionada"));
             alert("¡Gracias por tu comentario!");
-            setTimeout(mostrarComentarios, 2500);
+            setTimeout(mostrarComentarios, fotos.length ? 6000 : 2500);
         } catch (error) {
             alert("No se pudo enviar el comentario. Probá de nuevo.");
         }
@@ -716,6 +831,19 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
                 caja.appendChild(crearEl("strong", "", c.nombre));
                 caja.appendChild(crearEl("div", "estrellas-mostradas", textoEstrellas(Number(c.calificacion))));
                 caja.appendChild(crearEl("p", "", c.comentario));
+                const fotos = normalizarFotos(c.fotos);
+                if (fotos.length) {
+                    const galeria = crearEl("div", "fotos-comentario");
+                    fotos.forEach(src => {
+                        const img = document.createElement("img");
+                        img.src = src;
+                        img.loading = "lazy";
+                        img.alt = "Foto del comentario";
+                        img.addEventListener("click", () => abrirVisor(src));
+                        galeria.appendChild(img);
+                    });
+                    caja.appendChild(galeria);
+                }
                 if (c.editado) caja.appendChild(crearEl("small", "", "(editado)"));
                 if (esMio || esAdmin) {
                     const acciones = crearEl("div", "acciones");
@@ -853,6 +981,7 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
             claveAdmin = guardada;
             actualizarLinkAdmin();
         }
+        renderPreview();
         mostrarComentarios();
     })();
     </script>

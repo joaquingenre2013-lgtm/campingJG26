@@ -98,50 +98,140 @@ button, a {
 <br><br>
 
 <style>
-        .contenedor-botones {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
+    .contenedor-botones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
 
-        .boton {
-            position: relative;
-            width: 320px;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+    .tarjeta {
+        position: relative;
+        width: 320px;
+    }
 
-            border-radius: 10px;
-            overflow: hidden;
-            text-decoration: none;
+    .boton {
+        position: relative;
+        width: 320px;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        overflow: hidden;
+        text-decoration: none;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: black;
+        font-family: Arial, sans-serif;
+        font-size: 30px;
+        font-weight: bold;
+    }
 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+    .productos {
+        background-image: url("para_fuego.jpeg");
+    }
+    .nombre {
+        position: relative;
+        z-index: 10;
+    }
 
-            color: black;
-            font-family: Arial, sans-serif;
-            font-size: 30px;
-            font-weight: bold;
-        }
+    /* Flecha arriba a la derecha */
+    .flecha {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 20;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
 
-        .productos {
-            background-image: url("para_fuego.jpeg");
-        }
+    .flecha.abierta {
+        transform: rotate(180deg);
+    }
 
-        .nombre {
-            position: relative;
-            z-index: 10;
-        }
-    </style>
+    /* Lista tipo menú (solo texto) */
+    .menu-productos {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 8px;
+        z-index: 30;
+        margin: 0;
+        padding: 10px 16px;
+        list-style: none;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: black;
+    }
 
-    <div class="contenedor-botones">
+    .menu-productos.visible {
+        display: block;
+    }
 
+    .menu-productos {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 8px;
+    z-index: 30;
+    margin: 0;
+    padding: 10px 16px;
+    list-style: none;
+    background: black;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: white;
+}
+    }
+</style>
+
+<div class="contenedor-botones">
+
+    <div class="tarjeta">
         <a class="boton productos" href="Productos para el fuego.html">
             <span class="nombre"><center><font size="7" color="white">Productos para el fuego</font></center></span>
         </a>
+
+        <button class="flecha" id="flecha" aria-label="Ver productos">▼</button>
+
+        <ul class="menu-productos" id="menu">
+            <li>Iniciadores de fuego</li>
+        </ul>
     </div>
+    <button class="flecha" aria-label="Ver productos">▼</button>
+
+    <ul class="menu-productos">
+        <li>Producto 1</li>
+        <li>Producto 2</li>
+    </ul>
+</div>
+
+</div>
+
+<script>
+    document.querySelectorAll(".tarjeta").forEach(tarjeta => {
+        const flecha = tarjeta.querySelector(".flecha");
+        const menu = tarjeta.querySelector(".menu-productos");
+
+        flecha.addEventListener("click", () => {
+            menu.classList.toggle("visible");
+            flecha.classList.toggle("abierta");
+        });
+    });
+</script>
 <center>
     <sub>
         <font color="white">
