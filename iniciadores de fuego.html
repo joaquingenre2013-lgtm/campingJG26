@@ -401,13 +401,12 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     <br><br>
 <p>A continuacion les hemos puesto una encuesta de compra:<br><br></p></section>
 <section id="pedidos"> 
-<!--Pedidos-->    
+<!--Pedidos-->
 <div class="pedido-fuego">
   <h2>🛒 Encarga tu pedido</h2>
 
-  <!-- Indicador de stock disponible -->
   <div class="stock-info" id="stockInfo">
-    📦 Stock disponible: <span id="stockDisponibleText">10</span> unidades
+    📦 Stock disponible: <span id="stockDisponibleText">...</span> unidades
   </div>
 
   <div class="fila-precio">
@@ -428,9 +427,6 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
   </div>
 
   <button type="button" id="btnComprar" class="btn-whatsapp">🛒 Comprar por WhatsApp</button>
-  
-  <!-- Botón de acceso para administrador -->
-  <button type="button" id="btnAdmin" class="btn-admin">⚙️ Administrar Stock</button>
 </div>
 
 <style>
@@ -502,95 +498,52 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
     transition: background 0.2s, opacity 0.2s;
   }
   .btn-whatsapp:hover:not(:disabled) { background: #1ebe5b; }
-  
+
   .btn-whatsapp:disabled {
     background: #999;
     cursor: not-allowed;
     opacity: 0.7;
   }
-
-  .btn-admin {
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #555;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px dashed #888;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .btn-admin:hover { background: rgba(255, 255, 255, 0.9); color: #000; }
 </style>
 
 <script>
   (function () {
-    const PRECIO = 4000;                   // Precio por paquete
-    const PASSWORD_ADMIN = "prodmax";         // 🔑 Contraseña de administrador
-    
-    // Recuperar el stock guardado en el navegador (si no existe, por defecto es 10)
-    let stockMaximo = localStorage.getItem("fuego_stock_max") !== null 
-                      ? parseInt(localStorage.getItem("fuego_stock_max"), 10) 
-                      : 10;
+    const PRECIO = 4000;
+    const NUMERO = "5493547452826";
+    let stockMaximo = 0;
 
     const inputPaquetes = document.getElementById("paquetes");
     const totalEl = document.getElementById("total");
     const precioEl = document.getElementById("precioUnitario");
     const btnComprar = document.getElementById("btnComprar");
-    const btnAdmin = document.getElementById("btnAdmin");
     const stockDisponibleText = document.getElementById("stockDisponibleText");
 
     const formato = n => "$" + n.toLocaleString("es-AR");
 
-    function actualizarAtributosStock() {
-      inputPaquetes.max = stockMaximo;
-      stockDisponibleText.textContent = stockMaximo;
-    }
-
     function obtenerCantidad() {
-      if (inputPaquetes.value.trim() === "") {
-        return 0;
-      }
-
+      if (inputPaquetes.value.trim() === "") return 0;
       let c = parseInt(inputPaquetes.value, 10);
-      if (isNaN(c) || c < 0) {
-        c = 0;
-        inputPaquetes.value = 0;
-      }
-      if (c > stockMaximo) {
-        c = stockMaximo;
-        inputPaquetes.value = c;
-      }
+      if (isNaN(c) || c < 0) { c = 0; inputPaquetes.value = 0; }
+      if (c > stockMaximo) { c = stockMaximo; inputPaquetes.value = c; }
       return c;
     }
 
     function actualizar() {
       const c = obtenerCantidad();
       const total = c * PRECIO;
-
       precioEl.textContent = formato(PRECIO);
       totalEl.textContent = formato(total);
-
-      if (total <= 0) {
-        btnComprar.disabled = true;
-      } else {
-        btnComprar.disabled = false;
-      }
+      btnComprar.disabled = total <= 0;
     }
 
     inputPaquetes.addEventListener("input", actualizar);
 
-    // Botón de compra por WhatsApp
     btnComprar.addEventListener("click", function () {
       const c = obtenerCantidad();
-      
       if (c <= 0) {
         alert("Por favor, selecciona al menos 1 paquete para realizar tu pedido.");
         return;
       }
-
-      const NUMERO = "5493547452826";
       const mensaje =
         "Hola! Quiero comprar iniciadores de fuego 🔥\n" +
         "📦 Paquetes: " + c + "\n" +
@@ -599,36 +552,17 @@ Bienvenidos/as a nuestra sección de iniciadores de fuego. En esta parte les vam
       window.open("https://wa.me/" + NUMERO + "?text=" + encodeURIComponent(mensaje), "_blank");
     });
 
-    // Panel de administración protegido por contraseña
-    btnAdmin.addEventListener("click", function () {
-      const pass = prompt("Ingresa la contraseña de administrador:");
-      if (pass === null) return;
-
-      if (pass === PASSWORD_ADMIN) {
-        const nuevoStock = prompt("Ingresa el nuevo stock máximo disponible:", stockMaximo);
-        if (nuevoStock !== null) {
-          const parsedStock = parseInt(nuevoStock, 10);
-          if (!isNaN(parsedStock) && parsedStock >= 0) {
-            stockMaximo = parsedStock;
-            
-            // Guardar permanentemente en el navegador
-            localStorage.setItem("fuego_stock_max", stockMaximo);
-
-            actualizarAtributosStock();
-            actualizar();
-            alert("¡Stock actualizado y guardado con éxito a " + stockMaximo + " unidades!");
-          } else {
-            alert("Por favor, introduce un número válido.");
-          }
-        }
-      } else {
-        alert("Contraseña incorrecta.");
-      }
-    });
-
-    // Inicializar
-    actualizarAtributosStock();
-    actualizar();
+    // Lee el stock desde stock.json (igual para todos los dispositivos)
+    fetch("stock.json?t=" + Date.now(), { cache: "no-store" })
+      .then(r => r.json())
+      .then(d => { stockMaximo = parseInt(d.stock, 10) || 0; })
+      .catch(() => { stockMaximo = 0; })
+      .finally(() => {
+        stockDisponibleText.textContent = stockMaximo;
+        inputPaquetes.max = stockMaximo;
+        if (stockMaximo === 0) inputPaquetes.value = 0;
+        actualizar();
+      });
   })();
 </script></p></section>
 <!-- ============ COMENTARIOS ============ -->
