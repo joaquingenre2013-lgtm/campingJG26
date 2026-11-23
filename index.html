@@ -126,17 +126,25 @@ button, a {
         font-family: Arial, sans-serif;
         font-size: 30px;
         font-weight: bold;
+        text-align: center;
     }
 
     .productos {
         background-image: url("para_fuego.jpeg");
+        color: white;
     }
+
+    .combos {
+        background-color: yellow;
+        color: black;
+    }
+
     .nombre {
         position: relative;
         z-index: 10;
     }
 
-    /* Flecha arriba a la derecha */
+    /* Flecha (solo para productos) */
     .flecha {
         position: absolute;
         top: 8px;
@@ -157,7 +165,7 @@ button, a {
         transform: rotate(180deg);
     }
 
-    /* Lista tipo menú (solo texto) */
+    /* Menú desplegable (solo para productos) */
     .menu-productos {
         display: none;
         position: absolute;
@@ -167,51 +175,40 @@ button, a {
         margin: 0;
         padding: 10px 16px;
         list-style: none;
-        background: white;
+        background: black;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         font-family: Arial, sans-serif;
         font-size: 16px;
-        color: black;
+        color: white;
     }
 
     .menu-productos.visible {
         display: block;
     }
-
-    .menu-productos {
-    display: none;
-    position: absolute;
-    top: 50px;
-    right: 8px;
-    z-index: 30;
-    margin: 0;
-    padding: 10px 16px;
-    list-style: none;
-    background: black;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    color: white;
-}
-    }
 </style>
 
 <div class="contenedor-botones">
 
+    <!-- Botón Productos (con flecha y menú) -->
     <div class="tarjeta">
         <a class="boton productos" href="Productos_para_el_fuego.html">
-            <span class="nombre"><center><font size="7" color="white">Productos para el fuego</font></center></span>
+            <span class="nombre">Productos para el fuego</span>
         </a>
 
-        <button class="flecha" id="flecha" aria-label="Ver productos">▼</button>
+        <button class="flecha" aria-label="Ver productos">▼</button>
 
-        <ul class="menu-productos" id="menu">
+        <ul class="menu-productos">
             <li>Iniciadores de fuego</li>
         </ul>
     </div>
-</div>
+
+    <!-- Botón Combos (fondo amarillo, SIN flecha ni menú) -->
+    <div class="tarjeta">
+        <a class="boton combos" href="Combos.html">
+            Combos y ofertas
+        </a>
+    </div>
 
 </div>
 
@@ -220,10 +217,14 @@ button, a {
         const flecha = tarjeta.querySelector(".flecha");
         const menu = tarjeta.querySelector(".menu-productos");
 
-        flecha.addEventListener("click", () => {
-            menu.classList.toggle("visible");
-            flecha.classList.toggle("abierta");
-        });
+        if (flecha && menu) {
+            flecha.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.toggle("visible");
+                flecha.classList.toggle("abierta");
+            });
+        }
     });
 </script>
 <center>
