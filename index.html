@@ -243,29 +243,6 @@ button, a {
    ); return false;">
     <sub>terminos, condiciones y aclaraciones.</sub>
 </a>
-</center>
-<dialog id="modalInicio" style="width: 800px; max-width: 95vw; height: 600px; max-height: 90vh; padding: 14px; border-radius: 8px; position: relative;">
-    <button
-        type="button"
-        aria-label="Cerrar"
-        onclick="document.getElementById('modalInicio').close()"
-        style="position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border: none; border-radius: 50%; background: #e5e5e5; color: #ff0000; font-size: 18px; line-height: 1; cursor: pointer;"
-    >&times;</button>
-    <iframe src="Terminos_condiciones_y_aclaraciones.html" style="width: 100%; height: calc(100% - 36px); border: none; margin-top: 28px;"></iframe>
-</dialog>
-
-<script>
-    window.addEventListener("DOMContentLoaded", () => {
-        const ref = document.referrer.toLowerCase();
-        const vinoDesdeIndex =
-            ref.includes("index.html") ||
-            ref.endsWith("/campingjg26/") ||
-            ref === "https://joaquingenre2013-lgtm.github.io/campingjg26/";
-
-        if (!vinoDesdeIndex) {
-            document.getElementById("modalInicio")?.showModal();
-        }
-    });
-</script>
+</center>
 </body>
 </html>
