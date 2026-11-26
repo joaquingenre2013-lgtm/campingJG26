@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Nuestros productos</title>
+    <style>
+/* Adaptación para celulares */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Imágenes */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Videos */
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Botones */
+button, a {
+    max-width: 100%;
+}
+
+/* Cuadros y contenido */
+.contenedor {
+    width: 100%;
+    max-width: 100%;
+    margin: auto;
+}
+
+/* Para celulares */
+@media (max-width: 600px) {
+
+    body {
+        font-size: 16px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    h2 {
+        font-size: 23px;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    .boton {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .contenedor {
+        width: 100%;
+        padding: 10px;
+    }
+}
+</style>
+</head>
+<body>
+<h2>Productos disponibles:</h2>
+<ul>
+	<li><a href="iniciadores_de_fuego.html">Iniciadores de fuego</a></li>
+	<li><a href="index.html">Página principal</a></li>
+</ul>
+<br>
+<center>
+    <sub>
+        Se ruega que antes de preguntar por nuestro chat, que lea nuestros
+    </sub>
+    <a href="Terminos_condiciones_y_aclaraciones.html"
+       style="color: blue;"
+       onclick="window.open(
+           this.href,
+           'ventana',
+           'width=800,height=600,left=' + ((screen.width-800)/2) +
+           ',top=' + ((screen.height-600)/2)
+       ); return false;">
+        <sub>terminos, condiciones y aclaraciones.</sub>
+    </a>
+</center>
+</body>
+</html>
